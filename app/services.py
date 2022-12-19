@@ -36,13 +36,9 @@ class SongCSVService:
         :return:
         """
         start = time.time()
-        count = linecount_wc(self.input_file)
-        print(count)
-        n = len(str(count // 1000))
-        print(n)
         chunk: pandas.core.frame.DataFrame
         for chunk in pd.read_csv(self.input_file, chunksize=1000):
-            self.process_songs_data(chunk.values, n)
+            self.process_songs_data(chunk.values)
         print(f'Process took {int(time.time() - start)} seconds')
         output_file = self.make_result()
         print(f'Make result took {int(time.time() - start)} seconds')
@@ -58,7 +54,7 @@ class SongCSVService:
         path = self.tmp_directory + '/' + path + '/' + file_name
         return path
 
-    def process_songs_data(self, songs_data: List, n: int):
+    def process_songs_data(self, songs_data: List):
         song_key_to_nums_of_play = collections.defaultdict(int)
         for row in songs_data:
             song_name = row[0]
@@ -120,6 +116,6 @@ class TestABC(unittest.TestCase):
 
     def test_song_csv_processing(self):
         tracemalloc.start()
-        SongCSVService(1, "../songs_1_Mi.csv").process()
+        SongCSVService(1, "../songs_10_Mi.csv").process()
         current, peak = tracemalloc.get_traced_memory()
         print(current / 1024 / 1024, peak / 1024 / 1024)
