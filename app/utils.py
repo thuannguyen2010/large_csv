@@ -1,6 +1,7 @@
 """
 Utils
 """
+import hashlib
 
 DELIMITER = '___'
 
@@ -24,3 +25,15 @@ def get_song_name_and_date_from_song_key(song_key: str):
     if len(arr) > 1:
         return arr[0], arr[1]
     return None, None
+
+
+def hash_value(value):
+    return int(hashlib.sha1(value.encode("utf-8")).hexdigest()[:7], 16)
+
+
+def get_file_url(partition_number):
+    path = str(partition_number)
+    while partition_number > 1000:
+        path = str(partition_number // 1000) + '/' + path
+        partition_number = partition_number // 1000
+    return path
