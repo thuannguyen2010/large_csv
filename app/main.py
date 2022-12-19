@@ -1,53 +1,55 @@
-import time
+import os
+from http.client import HTTPException
+from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
+from fastapi.responses import StreamingResponse
+
+from app.models import Status
+from app.repositories import RequestRepository
+from app.services import SongCSVService
 
 app = FastAPI()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.get("/result/{request_id}")
+def get_result(request_id: int):
+    request = RequestRepository().get_request_by_id(request_id)
+    if not request:
+        return HTTPException(status_code=404, detail="request id not found")
+    if request.status == Status.DONE.PROCESSING.value:
+        return {
+            'result': 'request is processing'
+        }
+
+    def iterfile():
+        CHUNK_SIZE = 1024 * 1024
+        file = Path(request.file_name).stem
+        with open(f'./outputs/{file}_{request.id}/result_{request.file_name}', 'rb') as f:
+            while chunk := f.read(CHUNK_SIZE):
+                yield chunk
+
+    headers = {'Content-Disposition': 'attachment; filename="large_file.tar"'}
+    return StreamingResponse(iterfile(), headers=headers, media_type='application/x-tar')
 
 
-@app.get("/file-upload")
-async def root():
-    return {"requestId": "requestId"}
+def process_request(request_id: int, input_file: str):
+    SongCSVService(request_id, input_file).process()
+    RequestRepository().update_request(request_id, Status.DONE.value)
 
 
-def str_time_prop(start, end, time_format, prop):
-    """Get a time at a proportion of a range of two formatted times.
-
-    start and end should be strings specifying times formatted in the
-    given format (strftime-style), giving an interval [start, end].
-    prop specifies how a proportion of the interval to be taken after
-    start.  The returned time will be in the specified format.
-    """
-
-    stime = time.mktime(time.strptime(start, time_format))
-    etime = time.mktime(time.strptime(end, time_format))
-
-    ptime = stime + prop * (etime - stime)
-
-    return time.strftime(time_format, time.localtime(ptime))
-
-
-if __name__ == '__main__':
-    import random
-
-    outfile = 'songs_100_Ki.csv'
-    outsize = 1024 * 100 * 1  # 1MB
-    songs = [f'song{str(i)}' for i in range(1000)]
-
-
-    def random_date(start, end, prop) -> str:
-        return str_time_prop(start, end, '%Y-%m-%d', prop)
-
-
-    with open(outfile, 'ab') as csvfile:
-        size = 0
-        csvfile.write("Song,Date,Number of Plays\n".encode())
-        while size < outsize:
-            txt = f"{random.choice(songs)},{random_date('2022-01-01', '2022-12-31', random.random())},1\n"
-            size += len(txt)
-            csvfile.write(txt.encode())
+@app.post("/upload")
+async def upload(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+    try:
+        path = f'./inputs/{file.filename}'
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'wb') as f:
+            while contents := file.file.read(1024 * 1024):
+                f.write(contents)
+    except Exception:
+        return {"message": "There was an error uploading the file"}
+    finally:
+        file.file.close()
+    request_id = RequestRepository().create_request(file.filename)
+    background_tasks.add_task(process_request, request_id, path)
+    return {"requestId": request_id}

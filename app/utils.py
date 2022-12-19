@@ -2,6 +2,7 @@
 Utils
 """
 import hashlib
+import os
 
 DELIMITER = '___'
 
@@ -28,7 +29,7 @@ def get_song_name_and_date_from_song_key(song_key: str):
 
 
 def hash_value(value):
-    return int(hashlib.sha1(value.encode("utf-8")).hexdigest()[:7], 16)
+    return int(hashlib.sha1(value.encode("utf-8")).hexdigest()[:5], 16)
 
 
 def get_file_url(partition_number):
@@ -37,3 +38,13 @@ def get_file_url(partition_number):
         path = str(partition_number // 1000) + '/' + path
         partition_number = partition_number // 1000
     return path
+
+
+def get_number_of_file_in_directory(dir_path):
+    count = 0
+    for path in os.listdir(dir_path):
+        # check if current path is a file
+        print(path)
+        if os.path.isfile(os.path.join(dir_path, path)):
+            count += 1
+    return count

@@ -25,11 +25,10 @@ class SongCSVService:
     def __init__(self, request_id, input_file):
         self.input_file = input_file
         self.input_file_name = Path(input_file).stem
-        self.directory = f'../outputs/{self.input_file_name}_{request_id}'
+        self.directory = f'./outputs/{self.input_file_name}_{request_id}'
         self.tmp_directory = self.directory + '/tmp'
         Path(self.tmp_directory).mkdir(parents=True, exist_ok=True)
 
-    # @profile
     def process(self) -> str:
         """
         processing data from a csv file of songs. Then output is file that contains result
@@ -66,10 +65,10 @@ class SongCSVService:
         # update the tmp results
         for song_key, nums_of_play in song_key_to_nums_of_play.items():
             partition_number = hash_value(song_key)
-            tmp_song_key_file_name = self.get_file_url(partition_number, song_key+'.txt')
+            tmp_song_key_file_name = self.get_file_url(partition_number, song_key + '.txt')
             current_nums_of_play = 0
+            os.makedirs(os.path.dirname(tmp_song_key_file_name), exist_ok=True)
             try:
-                os.makedirs(os.path.dirname(tmp_song_key_file_name), exist_ok=True)
                 with open(tmp_song_key_file_name, mode='rt') as f:
                     data = f.read()
                     if data.isdigit():
@@ -79,9 +78,8 @@ class SongCSVService:
             with open(tmp_song_key_file_name, mode='w') as f:
                 f.write(str(nums_of_play + current_nums_of_play))
 
-    # @profile
     def make_result(self) -> str:
-        output_file = f'{self.directory}/{self.input_file_name}_result.csv'
+        output_file = f'{self.directory}/result_{self.input_file_name}.csv'
         with open(output_file, 'w', encoding='utf-8') as csvfile:
             output_writer = csv.writer(csvfile)
             output_writer.writerow(['Song', 'Date', 'Total Number of Plays for Date'])
@@ -116,6 +114,6 @@ class TestABC(unittest.TestCase):
 
     def test_song_csv_processing(self):
         tracemalloc.start()
-        SongCSVService(1, "../songs_10_Mi.csv").process()
+        SongCSVService(1, "../inputs/songs_10_Mi.csv").process()
         current, peak = tracemalloc.get_traced_memory()
         print(current / 1024 / 1024, peak / 1024 / 1024)
