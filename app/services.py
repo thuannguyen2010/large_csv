@@ -4,6 +4,8 @@ Service for file processing
 import collections
 import csv
 import shutil
+import time
+import tracemalloc
 import unittest
 from pathlib import Path
 from typing import List
@@ -27,11 +29,15 @@ class SongCSVService:
         processing data from a csv file of songs. Then output is file that contains result
         :return:
         """
+        start_time = time.time()
         chunk: pandas.core.frame.DataFrame
         for chunk in pd.read_csv(self.input_file, chunksize=1000):
             self.process_songs_data(chunk.values)
+        print(f'Process data took {int(time.time() - start_time)} seconds')
         output_file = self.make_result()
+        print(f'Make result took {int(time.time() - start_time)} seconds')
         self.clean_up()
+        print(f'Process took {int(time.time() - start_time)} seconds')
         return output_file
 
     def process_songs_data(self, songs_data: List):
@@ -91,4 +97,7 @@ class SongCSVService:
 class TestABC(unittest.TestCase):
 
     def test_song_csv_processing(self):
-        SongCSVService(1, "../songs.csv").process()
+        tracemalloc.start()
+        SongCSVService(1, "../songs_1_Mi.csv").process()
+        current, high = tracemalloc.get_traced_memory()
+        print(current/1024/1024, high/1024/1024)
