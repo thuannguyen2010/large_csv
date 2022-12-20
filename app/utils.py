@@ -3,6 +3,7 @@ Utils
 """
 import hashlib
 import os
+from pathlib import Path
 
 DELIMITER = '___'
 
@@ -29,3 +30,7 @@ def get_number_of_file_in_directory(dir_path):
         if os.path.isfile(os.path.join(dir_path, path)):
             count += 1
     return count
+
+
+def get_project_root() -> Path:
+    return Path(__file__).parent.parent

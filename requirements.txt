@@ -3,3 +3,4 @@ pandas==1.5.2
 python-multipart==0.0.5
 uvicorn==0.20.0
 uvloop==0.17.0
+httpx==0.23.1

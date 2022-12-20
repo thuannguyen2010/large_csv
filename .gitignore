@@ -3,6 +3,7 @@ songs_4_Gi.csv
 .idea
 outputs/*
 inputs/*
+db/*
+!db/.gitkeep
 !inputs/.gitkeep
 !outputs/.gitkeep
-db

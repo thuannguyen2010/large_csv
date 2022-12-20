@@ -14,7 +14,7 @@ from typing import List
 import pandas as pd
 import pandas.core.frame
 
-from app.utils import get_song_key, get_song_name_and_date_from_song_key, hash_value
+from app.utils import get_song_key, get_song_name_and_date_from_song_key, hash_value, get_project_root
 
 
 def linecount_wc(input_file):
@@ -25,7 +25,7 @@ class SongCSVService:
     def __init__(self, request_id, input_file):
         self.input_file = input_file
         self.input_file_name = Path(input_file).stem
-        self.directory = f'./outputs/{self.input_file_name}_{request_id}'
+        self.directory = f'{get_project_root()}/outputs/{self.input_file_name}_{request_id}'
         self.tmp_directory = self.directory + '/tmp'
         Path(self.tmp_directory).mkdir(parents=True, exist_ok=True)
 
@@ -104,16 +104,18 @@ class SongCSVService:
                         output_writer.writerows(rows)
                         size = 0
                         rows = []
+            if rows:
+                output_writer.writerows(rows)
         return output_file
 
     def clean_up(self):
         shutil.rmtree(self.tmp_directory)
 
 
-class TestABC(unittest.TestCase):
-
-    def test_song_csv_processing(self):
-        tracemalloc.start()
-        SongCSVService(1, "../inputs/songs_10_Mi.csv").process()
-        current, peak = tracemalloc.get_traced_memory()
-        print(current / 1024 / 1024, peak / 1024 / 1024)
+# class TestABC(unittest.TestCase):
+#
+#     def test_song_csv_processing(self):
+#         tracemalloc.start()
+#         SongCSVService(1, "../inputs/songs_10_Mi.csv").process()
+#         current, peak = tracemalloc.get_traced_memory()
+#         print(current / 1024 / 1024, peak / 1024 / 1024)

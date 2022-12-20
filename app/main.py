@@ -8,6 +8,7 @@ from fastapi.responses import StreamingResponse
 from app.models import Status
 from app.repositories import RequestRepository
 from app.services import SongCSVService
+from app.utils import get_project_root
 
 app = FastAPI()
 
@@ -46,7 +47,7 @@ def process_request(request_id: int, input_file: str, background_tasks: Backgrou
 @app.post("/upload")
 async def upload(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     try:
-        path = f'./inputs/{file.filename}'
+        path = f'{get_project_root()}/inputs/{file.filename}'
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, 'wb') as f:
             while contents := file.file.read(1024 * 1024):
