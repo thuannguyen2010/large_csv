@@ -6,8 +6,6 @@ import csv
 import os
 import shutil
 import time
-import tracemalloc
-import unittest
 from pathlib import Path, PurePath
 from typing import List
 
@@ -110,12 +108,3 @@ class SongCSVService:
 
     def clean_up(self):
         shutil.rmtree(self.tmp_directory)
-
-
-# class TestABC(unittest.TestCase):
-#
-#     def test_song_csv_processing(self):
-#         tracemalloc.start()
-#         SongCSVService(1, "../inputs/songs_10_Mi.csv").process()
-#         current, peak = tracemalloc.get_traced_memory()
-#         print(current / 1024 / 1024, peak / 1024 / 1024)
