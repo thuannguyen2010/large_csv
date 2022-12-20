@@ -30,17 +30,14 @@ class SongCSVService:
     def process(self) -> str:
         """
         processing data from a csv file of songs. Then output is file that contains result
-        :return:
+        :return: url of file
         """
         start = time.time()
         chunk: pandas.core.frame.DataFrame
         for chunk in pd.read_csv(self.input_file, chunksize=1000):
             self.process_songs_data(chunk.values)
-        print(f'Process took {int(time.time() - start)} seconds')
         output_file = self.make_result()
-        print(f'Make result took {int(time.time() - start)} seconds')
-        # self.clean_up()
-        print(f'Function took {int(time.time() - start)} seconds')
+        print(f'Process took {int(time.time() - start)} seconds')
         return output_file
 
     def get_file_url(self, partition_number, file_name):
