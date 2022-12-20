@@ -10,7 +10,7 @@ class RequestRepository:
     def get_request_by_id(self, request_id):
         try:
             with open(f'{get_project_root()}/db/{request_id}', mode='r') as f:
-                data = f.read().split(DELIMITER)
+                data = f.read().strip().split(DELIMITER)
                 return Request(id=request_id, file_name=data[0], status=data[1])
         except IOError:
             return None

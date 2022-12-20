@@ -220,6 +220,24 @@ After clone this repository:
 
 App will run on http://127.0.0.1:8000
 
-I used [Postman](https://www.postman.com/downloads/) for the client
+I used [Postman](https://www.postman.com/downloads/) for the client. And here is the demo
+- Upload file
+![img.png](./assets/img1.png)
+![img.png](./assets/img2.png)
+I prepared a file named `test.csv` and you can use it for demo (file size is 1MB with 500k rows)
+![img.png](./assets/img3.png)
+You will get the response with `request_id`
+![img.png](./assets/img4.png)
+- Download file
+![img.png](./assets/img5.png)
 
-![img.png](assets/img.png)
+If the file is being processed, you will get the json response that indicates the file is processing.
+
+If process is done. You will get the data
+
+Data in response
+![img.png](./assets/img6.png)
+Or download it as file
+![img_1.png](./assets/img7.png)
+
+## Thank you for reading
