@@ -7,3 +7,4 @@ db/*
 !db/.gitkeep
 !inputs/.gitkeep
 !outputs/.gitkeep
+**/__pycache__/

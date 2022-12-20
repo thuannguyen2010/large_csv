@@ -240,4 +240,14 @@ Data in response
 Or download it as file
 ![img_1.png](./assets/img7.png)
 
+## Summary
+After finish this project, I see some Pros and Cons of it
+
+### Pros
+- The memory is controlled and limited during processing file because service always processes by chunk instead of loading all into memory and use disk as layer for temporary data instead of memory.
+- I tried with 100KB, 1MB, 10MB and 20MB. The highest used memory was 5MB for all of them.
+
+### Cons
+- The process is slow because processing by chunk and with large files, there are too many temporary files to write to disk.
+
 ## Thank you for reading
