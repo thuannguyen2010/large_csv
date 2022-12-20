@@ -41,7 +41,7 @@ class SongCSVService:
         print(f'Process took {int(time.time() - start)} seconds')
         output_file = self.make_result()
         print(f'Make result took {int(time.time() - start)} seconds')
-        self.clean_up()
+        # self.clean_up()
         print(f'Function took {int(time.time() - start)} seconds')
         return output_file
 

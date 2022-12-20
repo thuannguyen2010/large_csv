@@ -22,9 +22,9 @@ def str_time_prop(start, end, time_format, prop):
 if __name__ == '__main__':
     import random
 
-    outfile = 'inputs/songs_100_Mi.csv'
+    outfile = 'inputs/songs_1_Mi.csv'
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
-    outsize = 1024 * 1024 * 100  # 1MB
+    outsize = 1024 * 1024 * 1  # 1MB
     songs = [f'song{str(i)}' for i in range(1000)]
 
 
