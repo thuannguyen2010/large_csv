@@ -1,4 +1,9 @@
 .venv
-songs.csv
+songs_4_Gi.csv
 .idea
-outputs
+outputs/*
+inputs/*
+db/*
+!db/.gitkeep
+!inputs/.gitkeep
+!outputs/.gitkeep

@@ -1,56 +1,71 @@
-import sys
+import os
+from http.client import HTTPException
+from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
+from fastapi.responses import StreamingResponse
+
+from app.models import Status
+from app.repositories import RequestRepository
+from app.services import SongCSVService
+from app.utils import get_project_root
 
 app = FastAPI()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.get("/result/{request_id}")
+def get_result(request_id: int):
+    request = RequestRepository().get_request_by_id(request_id)
+    if not request:
+        return HTTPException(status_code=404, detail="request id not found")
+    if request.status == Status.DONE.PROCESSING.value:
+        return {
+            "code": "success",
+            "message": "request is processing",
+            "data": {}
+        }
+    result_file_name = f'result_{request.file_name}'
+
+    def iterfile():
+        CHUNK_SIZE = 1024 * 1024
+        file = Path(request.file_name).stem
+        with open(f'./outputs/{file}_{request.id}/{result_file_name}', 'rb') as f:
+            while chunk := f.read(CHUNK_SIZE):
+                yield chunk
+
+    headers = {'Content-Disposition': f'attachment; filename="{result_file_name}"'}
+    return StreamingResponse(iterfile(), headers=headers, media_type='text/csv')
 
 
-@app.get("/file-upload")
-async def root():
-    return {"requestId": "requestId"}
+def process_request(request_id: int, input_file: str, background_tasks: BackgroundTasks):
+    service = SongCSVService(request_id, input_file)
+    service.process()
+    RequestRepository().update_request(request_id, Status.DONE.value)
+    background_tasks.add_task(service.clean_up)
 
 
-if __name__ == "__main__":
-    import random
-    import csv
-    import time
-
-
-    def str_time_prop(start, end, time_format, prop):
-        """Get a time at a proportion of a range of two formatted times.
-
-        start and end should be strings specifying times formatted in the
-        given format (strftime-style), giving an interval [start, end].
-        prop specifies how a proportion of the interval to be taken after
-        start.  The returned time will be in the specified format.
-        """
-
-        stime = time.mktime(time.strptime(start, time_format))
-        etime = time.mktime(time.strptime(end, time_format))
-
-        ptime = stime + prop * (etime - stime)
-
-        return time.strftime(time_format, time.localtime(ptime))
-
-
-    def random_date(start, end, prop) -> str:
-        return str_time_prop(start, end, '%Y-%m-%d', prop)
-
-
-    outfile = 'songs.csv'
-    outsize = 8 * 1024 * 1024 * 6400  # 2.4*6400MB
-    with open(outfile, 'w', encoding='utf-8') as csvfile:
-        size = 0
-        writer = csv.writer(csvfile)
-        writer.writerow(["Song", "Date", "Number of Plays"])
-        songs = [f'song{str(i)}' for i in range(1000)]
-        while size < outsize:
-            row = [random.choice(songs), random_date('2022-01-01', '2022-12-31', random.random()),
-                   1]
-            size += sys.getsizeof(row)
-            writer.writerow(row)
+@app.post("/upload")
+async def upload(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+    try:
+        path = f'{get_project_root()}/inputs/{file.filename}'
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'wb') as f:
+            while contents := file.file.read(1024 * 1024):
+                f.write(contents)
+    except Exception:
+        return {
+            "code": "success",
+            "message": "There was an error uploading the file",
+            "data": {}
+        }
+    finally:
+        file.file.close()
+    request_id = RequestRepository().create_request(file.filename)
+    background_tasks.add_task(process_request, request_id, path, background_tasks)
+    return {
+        "code": "success",
+        "message": "success",
+        "data": {
+            "requestId": request_id
+        }
+    }
