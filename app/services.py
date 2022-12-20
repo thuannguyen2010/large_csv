@@ -15,10 +15,6 @@ import pandas.core.frame
 from app.utils import get_song_key, get_song_name_and_date_from_song_key, hash_value, get_project_root
 
 
-def linecount_wc(input_file):
-    return int(os.popen(f'wc -l {input_file}').read().split(' ')[0])
-
-
 class SongCSVService:
     def __init__(self, request_id, input_file):
         self.input_file = input_file
