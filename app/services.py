@@ -36,7 +36,13 @@ class SongCSVService:
         print(f'Process took {int(time.time() - start)} seconds')
         return output_file
 
-    def get_file_url(self, partition_number, file_name):
+    def get_file_url(self, partition_number, file_name) -> str:
+        """
+        Get the address of .txt file by partition number
+        :param partition_number:
+        :param file_name:
+        :return: address of file
+        """
         path = str(partition_number)
         while partition_number > 1000:
             path = str(partition_number // 1000) + '/' + path
@@ -45,6 +51,11 @@ class SongCSVService:
         return path
 
     def process_songs_data(self, songs_data: List):
+        """
+        Process a list of data in input file
+        For each row, nums of play is updated to associated .txt file
+        :param songs_data: a list of rows in input file
+        """
         song_key_to_nums_of_play = collections.defaultdict(int)
         for row in songs_data:
             song_name = row[0]
@@ -70,6 +81,11 @@ class SongCSVService:
                 f.write(str(nums_of_play + current_nums_of_play))
 
     def make_result(self) -> str:
+        """
+        Make the output file
+        After process all rows from input. We read from tmp directory, each .txt contains nums of play of a song by day
+        :return: url of file
+        """
         output_file = f'{self.directory}/result_{self.input_file_name}.csv'
         with open(output_file, 'w', encoding='utf-8') as csvfile:
             output_writer = csv.writer(csvfile)
@@ -100,4 +116,7 @@ class SongCSVService:
         return output_file
 
     def clean_up(self):
+        """
+        Delete tmp dir
+        """
         shutil.rmtree(self.tmp_directory)
