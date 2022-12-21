@@ -245,7 +245,7 @@ After finish this project, I see some Pros and Cons of it
 
 ### Pros
 - The memory is controlled and limited during processing file because service always processes by chunk instead of loading all into memory and use disk as layer for temporary data instead of memory.
-- I tried with 100KB, 1MB, 10MB and 20MB. The highest used memory was 5MB for all of them.
+- I tried with 100KB, 1MB, 10MB and 20MB. The highest used memory was 5MB for all of them (use tracemalloc and [memory-profiler](https://pypi.org/project/memory-profiler/) to measure)
 
 ### Cons
 - The process is slow because processing by chunk and with large files, there are too many temporary files to write to disk.
