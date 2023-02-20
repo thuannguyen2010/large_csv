@@ -1,6 +1,6 @@
 # Large CSV
 
-Candidate: Thuan Nguyen (thuannguyen1259@gmail.com).
+Author: Thuan Nguyen (thuannguyen1259@gmail.com).
 
 In this project, I use FastAPI framework for building APIs
 
