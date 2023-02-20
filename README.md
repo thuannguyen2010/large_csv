@@ -1,4 +1,4 @@
-# BMAT: Large CSV
+# Large CSV
 
 Candidate: Thuan Nguyen (thuannguyen1259@gmail.com).
 
